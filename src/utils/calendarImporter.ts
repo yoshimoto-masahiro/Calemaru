@@ -1,4 +1,5 @@
 import { CalendarEvent, CalendarSource, FileImportResult } from '../types/calendar';
+import { parseImageFile } from './imageCalendarParser';
 
 // ICS形式のパーサー
 export const parseICSFile = (content: string, source: CalendarSource): FileImportResult => {
@@ -179,39 +180,63 @@ const parseICSDate = (dateStr: string): Date => {
 export const importCalendarFile = (file: File, source: CalendarSource): Promise<FileImportResult> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      let result: FileImportResult;
-      
-      if (file.name.toLowerCase().endsWith('.ics')) {
-        result = parseICSFile(content, source);
-      } else if (file.name.toLowerCase().endsWith('.csv')) {
-        result = parseCSVFile(content, source);
-      } else if (file.name.toLowerCase().endsWith('.json')) {
-        result = parseJSONFile(content, source);
-      } else {
-        result = {
-          success: false,
-          events: [],
-          errors: ['サポートされていないファイル形式です。ICS、CSV、JSONファイルをご利用ください。'],
-          fileName: file.name
-        };
-      }
-      
-      result.fileName = file.name;
-      resolve(result);
-    };
-    
+
     reader.onerror = () => {
       resolve({
         success: false,
         events: [],
         errors: ['ファイルの読み込みに失敗しました'],
-        fileName: file.name
+        fileName: file.name,
       });
     };
-    
-    reader.readAsText(file);
+
+    if (file.type.startsWith('image/')) {
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string;
+          const events = await parseImageFile(content, source);
+          resolve({
+            success: events.length > 0,
+            events,
+            errors: events.length > 0 ? [] : ['画像から予定を抽出できませんでした'],
+            fileName: file.name,
+          });
+        } catch {
+          resolve({
+            success: false,
+            events: [],
+            errors: ['画像ファイルの解析に失敗しました'],
+            fileName: file.name,
+          });
+        }
+      };
+
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        let result: FileImportResult;
+
+        if (file.name.toLowerCase().endsWith('.ics')) {
+          result = parseICSFile(content, source);
+        } else if (file.name.toLowerCase().endsWith('.csv')) {
+          result = parseCSVFile(content, source);
+        } else if (file.name.toLowerCase().endsWith('.json')) {
+          result = parseJSONFile(content, source);
+        } else {
+          result = {
+            success: false,
+            events: [],
+            errors: ['サポートされていないファイル形式です。ICS、CSV、JSON、画像ファイルをご利用ください。'],
+            fileName: file.name,
+          };
+        }
+
+        result.fileName = file.name;
+        resolve(result);
+      };
+
+      reader.readAsText(file);
+    }
   });
 };
