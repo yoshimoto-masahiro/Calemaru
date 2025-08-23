@@ -27,6 +27,8 @@ export const parseICSFile = (content: string, source: CalendarSource): FileImpor
             color: source.color,
             allDay: currentEvent.allDay || false,
           });
+        } else {
+          errors.push('イベントの必須フィールドが不足しています');
         }
         inEvent = false;
         currentEvent = {};
@@ -36,13 +38,25 @@ export const parseICSFile = (content: string, source: CalendarSource): FileImpor
         } else if (line.startsWith('DESCRIPTION:')) {
           currentEvent.description = line.substring(12);
         } else if (line.startsWith('DTSTART:')) {
-          const dateStr = line.substring(8);
-          currentEvent.startDate = parseICSDate(dateStr);
+          try {
+            const dateStr = line.substring(8);
+            currentEvent.startDate = parseICSDate(dateStr);
+          } catch (error) {
+            errors.push(`開始時刻の解析エラー: ${error}`);
+          }
         } else if (line.startsWith('DTEND:')) {
-          const dateStr = line.substring(6);
-          currentEvent.endDate = parseICSDate(dateStr);
+          try {
+            const dateStr = line.substring(6);
+            currentEvent.endDate = parseICSDate(dateStr);
+          } catch (error) {
+            errors.push(`終了時刻の解析エラー: ${error}`);
+          }
         }
       }
+    }
+    
+    if (events.length === 0 && errors.length === 0) {
+      errors.push('有効なイベントが見つかりませんでした');
     }
   } catch (error) {
     errors.push(`ICSファイルの解析エラー: ${error}`);
@@ -127,12 +141,17 @@ export const parseJSONFile = (content: string, source: CalendarSource): FileImpo
     for (const eventData of eventsArray) {
       try {
         if (eventData.title || eventData.summary) {
+          const startDate = new Date(eventData.startDate || eventData.start);
+          const endDate = eventData.endDate || eventData.end 
+            ? new Date(eventData.endDate || eventData.end)
+            : new Date(startDate.getTime() + 60 * 60 * 1000);
+            
           events.push({
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             title: eventData.title || eventData.summary,
             description: eventData.description || '',
-            startDate: new Date(eventData.startDate || eventData.start),
-            endDate: new Date(eventData.endDate || eventData.end || eventData.startDate || eventData.start),
+            startDate,
+            endDate,
             source,
             color: source.color,
             allDay: eventData.allDay || false,
