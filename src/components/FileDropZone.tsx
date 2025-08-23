@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, AlertCircle, CheckCircle, X } from 'lucide-react';
-import { CalendarSource, FileImportResult } from '../types/calendar';
+import { CalendarSource, CalendarEvent, FileImportResult } from '../types/calendar';
 import { importCalendarFile } from '../utils/calendarImporter';
 
 interface FileDropZoneProps {
   sources: CalendarSource[];
-  onImport: (events: any[]) => void;
+  onImport: (events: CalendarEvent[]) => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -138,12 +138,12 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".ics,.csv,.json"
+              accept=".ics,.csv,.json,.png,.jpg,.jpeg"
               onChange={handleFileSelect}
               className="hidden"
             />
             <p className="text-sm text-gray-500 mt-4">
-              対応形式: ICS, CSV, JSON
+              対応形式: ICS, CSV, JSON, PNG, JPG
             </p>
           </div>
 

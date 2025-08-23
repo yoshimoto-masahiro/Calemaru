@@ -227,7 +227,7 @@ export const importCalendarFile = (file: File, source: CalendarSource): Promise<
           result = {
             success: false,
             events: [],
-            errors: ['サポートされていないファイル形式です。ICS、CSV、JSON、画像ファイルをご利用ください。'],
+            errors: ['サポートされていないファイル形式です。ICS、CSV、JSON、PNG、JPGをご利用ください。'],
             fileName: file.name,
           };
         }
