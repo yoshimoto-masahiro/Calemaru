@@ -30,6 +30,7 @@ describe('useCalendar Hook', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   describe('Initial State', () => {

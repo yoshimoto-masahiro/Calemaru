@@ -18,11 +18,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["../src/*"]
-    }
+    },
+    "types": ["jest", "node"]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

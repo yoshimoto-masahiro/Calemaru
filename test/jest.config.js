@@ -30,5 +30,10 @@ module.exports = {
   ],
   transformIgnorePatterns: [
     'node_modules/(?!(tesseract\\.js)/)'
-  ]
+  ],
+  moduleDirectories: ['node_modules', '<rootDir>', '<rootDir>/../src'],
+  roots: ['<rootDir>', '<rootDir>/../src'],
+  testEnvironmentOptions: {
+    customExportConditions: ['node', 'node-addons']
+  }
 };
