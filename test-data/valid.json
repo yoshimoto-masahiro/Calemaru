@@ -1,0 +1,20 @@
+[
+  {
+    "title": "JSONテストイベント1",
+    "description": "JSON形式のテストイベント",
+    "startDate": "2025-02-15T10:00:00Z",
+    "endDate": "2025-02-15T11:00:00Z",
+    "allDay": false
+  },
+  {
+    "summary": "JSONテストイベント2",
+    "description": "summaryフィールドを使用",
+    "start": "2025-02-16T14:00:00Z",
+    "end": "2025-02-16T15:00:00Z"
+  },
+  {
+    "title": "終日イベント",
+    "startDate": "2025-02-17",
+    "allDay": true
+  }
+]
