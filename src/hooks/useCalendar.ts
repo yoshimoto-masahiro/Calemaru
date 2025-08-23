@@ -34,10 +34,21 @@ export const useCalendar = () => {
       date.setDate(startDate.getDate() + i);
       
       const dayEvents = filteredEvents.filter(event => {
-        const eventDate = new Date(event.startDate);
-        return eventDate.getDate() === date.getDate() &&
-               eventDate.getMonth() === date.getMonth() &&
-               eventDate.getFullYear() === date.getFullYear();
+        const eventStartDate = new Date(event.startDate);
+        const eventEndDate = new Date(event.endDate);
+        
+        // イベントがその日に開始する、またはその日を含む期間内にあるかチェック
+        const isEventOnThisDay = (
+          (eventStartDate.getDate() === date.getDate() &&
+           eventStartDate.getMonth() === date.getMonth() &&
+           eventStartDate.getFullYear() === date.getFullYear()) ||
+          (eventEndDate.getDate() === date.getDate() &&
+           eventEndDate.getMonth() === date.getMonth() &&
+           eventEndDate.getFullYear() === date.getFullYear()) ||
+          (eventStartDate <= date && eventEndDate >= date)
+        );
+        
+        return isEventOnThisDay;
       });
       
       days.push({
@@ -54,7 +65,23 @@ export const useCalendar = () => {
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      if (direction === 'next') {
+        if (prev.getMonth() === 11) {
+          // 12月から1月へ
+          newDate.setFullYear(prev.getFullYear() + 1);
+          newDate.setMonth(0);
+        } else {
+          newDate.setMonth(prev.getMonth() + 1);
+        }
+      } else {
+        if (prev.getMonth() === 0) {
+          // 1月から12月へ
+          newDate.setFullYear(prev.getFullYear() - 1);
+          newDate.setMonth(11);
+        } else {
+          newDate.setMonth(prev.getMonth() - 1);
+        }
+      }
       return newDate;
     });
   };
@@ -67,6 +94,10 @@ export const useCalendar = () => {
           : source
       )
     );
+  };
+
+  const addSource = (newSource: CalendarSource) => {
+    setSources(prev => [...prev, newSource]);
   };
 
   const createEvent = (eventData: Omit<CalendarEvent, 'id'>) => {
@@ -111,12 +142,14 @@ export const useCalendar = () => {
     currentDate,
     calendarDays,
     sources,
-    events: filteredEvents,
+    events,
+    filteredEvents,
     selectedEvent,
     isEventModalOpen,
     isCreating,
     navigateMonth,
     toggleSourceEnabled,
+    addSource,
     createEvent,
     updateEvent,
     deleteEvent,

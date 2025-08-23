@@ -177,7 +177,7 @@ CSV会議,2025-01-24 10:00,2025-01-24 11:00`;
       });
 
       // 全てのイベントが正しくインポートされていることを確認
-      expect(result.current.events).toHaveLength(initialEventCount + 7); // ICS:1 + CSV:1 + JSON:1 + Image:2 + 元のイベント:6
+      expect(result.current.events).toHaveLength(initialEventCount + 5); // ICS:1 + CSV:1 + JSON:1 + Image:2 = 5
 
       const importedTitles = ['ICS会議', 'CSV会議', 'JSON会議', 'テスト会議', '終日イベント'];
       importedTitles.forEach(title => {
@@ -203,8 +203,10 @@ CSV会議,2025-01-24 10:00,2025-01-24 11:00`;
 
       // 新しいソースを追加
       act(() => {
-        result.current.sources = [...result.current.sources, newSource];
+        result.current.addSource(newSource);
       });
+
+      console.log('Sources after adding new source:', result.current.sources.map(s => ({ id: s.id, enabled: s.enabled })));
 
       // 新しいソースでイベントをインポート
       const icsContent = `BEGIN:VCALENDAR
@@ -221,10 +223,15 @@ END:VCALENDAR`;
         result.current.importEvents(importResult.events);
       });
 
+      console.log('Events after import:', result.current.events.map(e => ({ title: e.title, source: e.source.id })));
+      console.log('Filtered events after import:', result.current.filteredEvents.map(e => ({ title: e.title, source: e.source.id })));
+
       // ソースを無効化
       act(() => {
         result.current.toggleSourceEnabled(newSource.id);
       });
+
+      console.log('Sources after disabling:', result.current.sources.map(s => ({ id: s.id, enabled: s.enabled })));
 
       // フィルタリングされたイベントから除外される
       const filteredEvents = result.current.filteredEvents;
@@ -236,9 +243,16 @@ END:VCALENDAR`;
         result.current.toggleSourceEnabled(newSource.id);
       });
 
+      console.log('Sources after re-enabling:', result.current.sources.map(s => ({ id: s.id, enabled: s.enabled })));
+
       // フィルタリングされたイベントに再表示される
       const reFilteredEvents = result.current.filteredEvents;
       const reImportedEvent = reFilteredEvents.find(e => e.title === 'フィルターテスト会議');
+      
+      // デバッグ情報を追加
+      console.log('Re-enabled source events:', reFilteredEvents.map(e => ({ title: e.title, source: e.source.id })));
+      console.log('Looking for event:', 'フィルターテスト会議');
+      
       expect(reImportedEvent).toBeDefined();
     });
   });
@@ -355,7 +369,8 @@ END:VCALENDAR`;
       // 全てのイベントが同じ日時を持つ
       consistencyEvents.forEach(event => {
         expect(event.startDate.getTime()).toBe(new Date('2025-01-29T10:00:00').getTime());
-        expect(event.endDate.getTime()).toBe(new Date('2025-01-29T10:00:00').getTime());
+        // 終了時刻は1時間後（デフォルト設定）
+        expect(event.endDate.getTime()).toBe(new Date('2025-01-29T11:00:00').getTime());
         expect(event.source.id).toBe(mockSource.id);
       });
     });
