@@ -1,0 +1,18 @@
+[
+  {
+    "title": "",
+    "description": "空のタイトル",
+    "startDate": "2025-02-15T10:00:00Z",
+    "endDate": "2025-02-15T11:00:00Z"
+  },
+  {
+    "title": "無効な日付",
+    "startDate": "invalid-date",
+    "endDate": "2025-02-15T11:00:00Z"
+  },
+  {
+    "description": "タイトルなしイベント",
+    "startDate": "2025-02-15T10:00:00Z"
+  },
+  "invalid-structure"
+]
