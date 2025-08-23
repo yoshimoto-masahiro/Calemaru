@@ -40,6 +40,7 @@ export const parseImageFile = async (
           endDate,
           source,
           color: source.color,
+          allDay: false,
         });
       } else {
         // 日付のみを含む行を終日イベントとして扱う
